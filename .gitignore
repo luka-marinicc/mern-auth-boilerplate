@@ -1,9 +1,16 @@
-# general
+# dependencies
 node_modules
 dist
-.DS_Store
+build
 
-# env
+# env files
 .env
 server/.env
 client/.env
+
+# system
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
