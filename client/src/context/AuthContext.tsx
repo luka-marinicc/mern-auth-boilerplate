@@ -11,7 +11,7 @@ interface Props {
 export const AuthProvider = ({ children }: Props) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [sessionActive, setSessionActive] = useState<boolean>(false); // ✅ start inactive
+    const [sessionActive, setSessionActive] = useState<boolean>(false);
 
     useEffect(() => {
         const initialize = async () => {

@@ -26,7 +26,8 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
             setLoading(true);
             const data = await getProfile();
             setProfile(data);
-            updateUser(data);
+
+            if (data && data._id !== user?._id) updateUser(data);
         } catch (err: any) {
             console.error("Error fetching profile:", err);
             setError(err.message);
@@ -70,8 +71,11 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     };
 
     useEffect(() => {
-        if (!user) return setProfile(null); 
-        refreshProfile();
+        if (!user) {
+            setProfile(null);
+            return;
+        }
+        if (!profile) refreshProfile();
     }, [user]);
 
     return (
