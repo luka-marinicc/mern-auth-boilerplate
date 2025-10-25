@@ -88,25 +88,24 @@ export const forgotPassword = async (req, res) => {
                 : process.env.ORIGIN_DEV;
 
         const resetLink = `${baseUrl}/reset/${token}`;
-
-
         const messageHTML = `
             <p>You requested a password reset.</p>
             <p>Click <a href="${resetLink}">here</a> to reset your password.</p>
             <p>This link expires in 10 minutes.</p>
         `;
 
-        sendEmail(email, "Password reset request", messageHTML);
+        await sendEmail(email, "Password Reset Request", messageHTML);
 
         res.status(200).json({
             success: true,
-            message: "Password reset link sent to email"
+            message: "Password reset link sent to email",
         });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error sending email" });
     }
-}
+};
+
 
 export const resetPassword = async (req, res) => {
     try {
