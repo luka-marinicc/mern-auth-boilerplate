@@ -12,7 +12,7 @@ interface Props {
 export const AuthProvider = ({ children }: Props) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [sessionActive, setSessionActive] = useState<boolean>(false);
+    const [sessionActive, setSessionActive] = useState<boolean>(true);
 
     useEffect(() => {
         const initialize = async () => {
@@ -21,12 +21,15 @@ export const AuthProvider = ({ children }: Props) => {
                 try {
                     const currentUser = await getMe();
                     setUser(currentUser);
+                    setSessionActive(true);
                 } catch (error) {
                     console.error("Session expired or invalid token.");
                     localStorage.removeItem("accessToken");
+                    setSessionActive(false);
                 }
+            } else {
+                setLoading(false);
             }
-            setLoading(false);
         };
         initialize();
     }, []);
@@ -52,6 +55,7 @@ export const AuthProvider = ({ children }: Props) => {
                 role: res.role,
                 avatar: res.avatar
             });
+            setSessionActive(true);
         } catch (error: any) {
             console.error(error.response?.data?.message || error.message);
             throw error;
@@ -69,6 +73,7 @@ export const AuthProvider = ({ children }: Props) => {
                 role: res.role,
                 avatar: res.avatar
             });
+            setSessionActive(true);
         } catch (error: any) {
             console.error(error.response?.data?.message || error.message);
             throw error;
@@ -80,6 +85,7 @@ export const AuthProvider = ({ children }: Props) => {
             await logoutUser();
             localStorage.removeItem("accessToken");
             setUser(null);
+            setSessionActive(false);
         } catch (error) {
             console.error("Error logging out:", error);
         }
