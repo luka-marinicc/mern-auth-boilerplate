@@ -20,14 +20,20 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     const [profile, setProfile] = useState<User | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [fetched, setFetched] = useState(false);
 
     const refreshProfile = async () => {
+        if (!user || fetched) return;
         try {
             setLoading(true);
             const data = await getProfile();
             setProfile(data);
 
-            if (data && data._id !== user?._id) updateUser(data);
+            if (!user || JSON.stringify(user) !== JSON.stringify(data)) {
+                updateUser(data);
+            }
+
+            setFetched(true);
         } catch (err: any) {
             console.error("Error fetching profile:", err);
             setError(err.message);
@@ -73,9 +79,10 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     useEffect(() => {
         if (!user) {
             setProfile(null);
+            setFetched(false);
             return;
         }
-        if (!profile) refreshProfile();
+        refreshProfile();
     }, [user]);
 
     return (
