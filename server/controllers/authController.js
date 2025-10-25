@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { transporter } from "../utils/mailer.js";
+import { sendEmail } from "../utils/mailer.js";
 import User from "../models/User.js";
 import { generateToken } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
@@ -90,22 +90,17 @@ export const forgotPassword = async (req, res) => {
         const resetLink = `${baseUrl}/reset/${token}`;
 
 
-        const message = {
-            from: `"Auth System" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: "Password Reset Request",
-            html: `
-                <p>You requested a password reset.</p>
-                <p>Click <a href="${resetLink}">here</a> to reset your password.</p>
-                <p>This link expires in 10 minutes.</p>
-            `,
-        };
+        const messageHTML = `
+            <p>You requested a password reset.</p>
+            <p>Click <a href="${resetLink}">here</a> to reset your password.</p>
+            <p>This link expires in 10 minutes.</p>
+        `;
 
-        await transporter.sendMail(message);
+        sendEmail(email, "Password reset request", messageHTML);
 
-        res.status(200).json({ 
+        res.status(200).json({
             success: true,
-            message: "Password reset link sent to email" 
+            message: "Password reset link sent to email"
         });
     } catch (error) {
         console.error(error);
