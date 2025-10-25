@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
+import { transporter } from "./utils/mailer.js";
 
 dotenv.config();
 connectDB();
@@ -37,6 +38,21 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
+
+app.get("/test-email", async (req, res) => {
+    try {
+        await transporter.sendMail({
+            from: `"Auth System" <${process.env.EMAIL_USER}>`,
+            to: process.env.EMAIL_USER,
+            subject: "SMTP Test",
+            text: "If you see this, Gmail SMTP works!",
+        });
+        res.send("✅ Email sent successfully!");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("❌ Email failed");
+    }
+});
 
 app.use(errorHandler);
 

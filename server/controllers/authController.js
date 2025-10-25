@@ -1,3 +1,5 @@
+import crypto from "crypto";
+import { transporter } from "../utils/mailer.js";
 import User from "../models/User.js";
 import { generateToken } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
@@ -68,3 +70,69 @@ export const logoutUser = (req, res) => {
     res.clearCookie("refreshToken");
     res.json({ message: "Logged out successfully" });
 };
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        const token = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = token;
+        user.resetPasswordExpires = Date.now() + 10 * 60 * 1000;
+        await user.save();
+
+        const baseUrl =
+            process.env.NODE_ENV === "production"
+                ? process.env.ORIGIN_PROD
+                : process.env.ORIGIN_DEV;
+
+        const resetLink = `${baseUrl}/reset/${token}`;
+
+
+        const message = {
+            from: `"Auth System" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: "Password Reset Request",
+            html: `
+                <p>You requested a password reset.</p>
+                <p>Click <a href="${resetLink}">here</a> to reset your password.</p>
+                <p>This link expires in 10 minutes.</p>
+            `,
+        };
+
+        await transporter.sendMail(message);
+
+        res.status(200).json({ 
+            success: true,
+            message: "Password reset link sent to email" 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error sending email" });
+    }
+}
+
+export const resetPassword = async (req, res) => {
+    try {
+        const { token } = req.params;
+        const { password } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: "Password has been reset successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error resetting password" });
+    }
+}
