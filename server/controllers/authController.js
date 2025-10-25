@@ -25,6 +25,7 @@ export const registerUser = async (req, res, next) => {
             username: user.username,
             email: user.email,
             role: user.role,
+            avatar: user.avatar,
             token,
         });
     } catch (error) {
