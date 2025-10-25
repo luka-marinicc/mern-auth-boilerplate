@@ -1,4 +1,4 @@
-# 🔒 MERN Auth Boilerplate
+# 🔒 MERN Auth Template (Production-Ready)
 
 ![React](https://img.shields.io/badge/Frontend-React-blue?logo=react)
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-green?logo=node.js)
@@ -7,8 +7,12 @@
 ![Deploy](https://img.shields.io/badge/Deploy-Vercel%20%2B%20Render-black?logo=vercel)
 
 
-A **production-ready full-stack authentication system** built with the MERN stack.  
-Includes JWT access + refresh tokens, secure HttpOnly cookies, role-based routing, and full deployment setup (Render + Vercel + MongoDB Atlas).
+A full-stack authentication boilerplate built with the MERN stack.  
+Includes JWT auth, secure cookies, refresh tokens, email reset, and full Render + Vercel + Cloudflare deployment pipeline.
+
+Use this template to instantly launch new full-stack apps with user auth out of the box.
+
+🧩 **Use this as a template:** [Click here →](https://github.com/luka-marinicc/mern-auth-boilerplate/generate)
 
 ---
 
