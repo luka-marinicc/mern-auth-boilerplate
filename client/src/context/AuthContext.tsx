@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 import { createContext, useState, useEffect, type ReactNode } from "react";
 import type { AuthContextType, User, LoginData, RegisterData } from "../types/auth";
 import { loginUser, registerUser, logoutUser, getMe } from "../api/users";
@@ -12,30 +11,40 @@ interface Props {
 export const AuthProvider = ({ children }: Props) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [sessionActive, setSessionActive] = useState<boolean>(true);
+    const [sessionActive, setSessionActive] = useState<boolean>(false); // ✅ start inactive
 
     useEffect(() => {
         const initialize = async () => {
             const token = localStorage.getItem("accessToken");
-            if (token) {
-                try {
-                    const currentUser = await getMe();
-                    setUser(currentUser);
-                    setSessionActive(true);
-                } catch (error) {
-                    console.error("Session expired or invalid token.");
-                    localStorage.removeItem("accessToken");
-                    setSessionActive(false);
-                }
-            } else {
+
+            if (!token) {
+                setSessionActive(false);
                 setLoading(false);
+                return;
+            }
+
+            try {
+                const currentUser = await getMe();
+                setUser(currentUser);
+                setSessionActive(true);
+            } catch (error) {
+                console.error("Session expired or invalid token.");
+                localStorage.removeItem("accessToken");
+                setSessionActive(false);
+            } finally {
+                setLoading(false); 
             }
         };
         initialize();
     }, []);
 
     useEffect(() => {
-        const handleSessionExpired = () => setSessionActive(false);
+        const handleSessionExpired = () => {
+            setSessionActive(false);
+            setUser(null);
+            localStorage.removeItem("accessToken");
+        };
+
         window.addEventListener("session-expired", handleSessionExpired);
         return () => window.removeEventListener("session-expired", handleSessionExpired);
     }, []);
@@ -53,7 +62,7 @@ export const AuthProvider = ({ children }: Props) => {
                 username: res.username,
                 email: res.email,
                 role: res.role,
-                avatar: res.avatar
+                avatar: res.avatar,
             });
             setSessionActive(true);
         } catch (error: any) {
@@ -71,7 +80,7 @@ export const AuthProvider = ({ children }: Props) => {
                 username: res.username,
                 email: res.email,
                 role: res.role,
-                avatar: res.avatar
+                avatar: res.avatar,
             });
             setSessionActive(true);
         } catch (error: any) {
@@ -83,11 +92,12 @@ export const AuthProvider = ({ children }: Props) => {
     const logout = async () => {
         try {
             await logoutUser();
+        } catch (error) {
+            console.error("Error logging out:", error);
+        } finally {
             localStorage.removeItem("accessToken");
             setUser(null);
             setSessionActive(false);
-        } catch (error) {
-            console.error("Error logging out:", error);
         }
     };
 
