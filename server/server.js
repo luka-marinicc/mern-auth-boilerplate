@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import { errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 

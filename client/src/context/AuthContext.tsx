@@ -12,7 +12,7 @@ interface Props {
 export const AuthProvider = ({ children }: Props) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [sessionActive, setSessionActive] = useState<boolean>(true);
+    const [sessionActive, setSessionActive] = useState<boolean>(false);
 
     useEffect(() => {
         const initialize = async () => {
@@ -37,6 +37,10 @@ export const AuthProvider = ({ children }: Props) => {
         return () => window.removeEventListener("session-expired", handleSessionExpired);
     }, []);
 
+    const updateUser = (updates: Partial<User>) => {
+        setUser((prev) => (prev ? { ...prev, ...updates } : prev));
+    };
+
     const login = async (data: LoginData) => {
         try {
             const res = await loginUser(data);
@@ -46,6 +50,7 @@ export const AuthProvider = ({ children }: Props) => {
                 username: res.username,
                 email: res.email,
                 role: res.role,
+                avatar: res.avatar
             });
         } catch (error: any) {
             console.error(error.response?.data?.message || error.message);
@@ -62,6 +67,7 @@ export const AuthProvider = ({ children }: Props) => {
                 username: res.username,
                 email: res.email,
                 role: res.role,
+                avatar: res.avatar
             });
         } catch (error: any) {
             console.error(error.response?.data?.message || error.message);
@@ -88,6 +94,7 @@ export const AuthProvider = ({ children }: Props) => {
                 login,
                 register,
                 logout,
+                updateUser,
             }}
         >
             {children}

@@ -3,6 +3,8 @@ export interface User {
     username: string;
     email: string;
     role: "user" | "admin";
+    avatar: string;
+
 }
 
 export interface AuthResponse {
@@ -11,6 +13,7 @@ export interface AuthResponse {
     email: string;
     role: "user" | "admin";
     token: string;
+    avatar: string;
 }
 
 export interface LoginData {
@@ -31,4 +34,5 @@ export interface AuthContextType {
     login: (data: LoginData) => Promise<void>;
     register: (data: RegisterData) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updates: Partial<User>) => void;
 }
