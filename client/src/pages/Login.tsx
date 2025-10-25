@@ -56,6 +56,19 @@ export default function Login() {
                     required
                 />
 
+                <div className="flex justify-end">
+                    <p className="text-sm text-center text-neutral-400 mt-3">
+                        Forgot your password?{" "}
+                        <Link
+                            to="/forgot-password"
+                            className="text-green-500 hover:text-green-400 transition-colors"
+                        >
+                            Reset it here.
+                        </Link>
+                    </p>
+
+                </div>
+
                 <Button type="submit" loading={loading}>
                     {loading ? "Logging in..." : "Login"}
                 </Button>
