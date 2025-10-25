@@ -21,16 +21,20 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
             console.warn(`🚫 CORS blocked: ${origin}`);
             return callback(new Error("Not allowed by CORS"));
         },
         credentials: true,
         methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-        allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"], // ✅ fixed
+        allowedHeaders: ["*"], 
+        exposedHeaders: ["*"], 
+        preflightContinue: false,
+        optionsSuccessStatus: 204,
     })
 );
-
 
 app.use(express.json());
 app.use(cookieParser());
