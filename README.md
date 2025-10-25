@@ -54,6 +54,10 @@ Includes JWT access + refresh tokens, secure HttpOnly cookies, role-based routin
 - ⚙️ **Dynamic CORS (Dev ↔ Prod Switching)**
 - ☁️ **Ready-to-Deploy Setup (Render + Vercel)**
 - 🧩 **Clean Component Architecture + Context API**
+- 🔁 **Password Reset via Email (Gmail SMTP)**
+  - Users can request a password reset link via email.
+  - Secure, time-limited token stored in MongoDB.
+  - Reset form validates token and updates password.
 
 ---
 
@@ -154,12 +158,13 @@ If `/health` returns `{ ok: true }`, deployment is working.
 | Logout          | Deletes cookie + returns 401 on `/me`      |
 | Browser         | `refreshToken` visible under Render domain |
 | SPA Refresh     | Works (thanks to `vercel.json`)            |
+| `/auth/forgot-password` | Returns 200 and sends email via Gmail SMTP |
+| `/auth/reset-password/:token` | Updates password and invalidates token |
+
 
 ---
 
 ## 🧠 Future Upgrades
-
-- 🔁 Password reset via email (Nodemailer)
 
 - ✅ Email verification
 
