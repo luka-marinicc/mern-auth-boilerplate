@@ -1,47 +1,76 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 export const getMe = async (req, res) => {
-    const user = await User.findById(req.user._id).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.status(200).json(user);
-}
+    try {
+        const user = await User.findById(req.user._id).select("-password");
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-export const updateProfile = async (req, res) => {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+        res.set("Cache-Control", "no-store");
+        res.status(200).json(user);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error fetching profile" });
+    }
+};
 
-    user.username = req.body.username || user.username;
-    user.avatar = req.body.avatar || user.avatar;
+export const updateMe = async (req, res) => {
+    try {
+        const { username, avatar } = req.body;
+        const user = await User.findById(req.user._id);
 
-    const updatedUser = await user.save();
-    res.status(200).json({
-        _id: updatedUser._id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        avatar: updatedUser.avatar,
-        role: updatedUser.role,
-    });
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        if (username) user.username = username;
+        if (avatar) user.avatar = avatar;
+
+        const updated = await user.save();
+        res.set("Cache-Control", "no-store");
+        res.json({
+            _id: updated._id,
+            username: updated.username,
+            email: updated.email,
+            role: updated.role,
+            avatar: updated.avatar,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error updating profile" });
+    }
 };
 
 export const changePassword = async (req, res) => {
-    const { oldPassword, newPassword } = req.body;
+    try {
+        const { oldPassword, newPassword } = req.body;
 
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
+        if (!oldPassword || !newPassword) {
+            return res.status(400).json({ message: "Both passwords required" });
+        }
 
-    const isMatch = await user.matchPassword(oldPassword);
-    if (!isMatch) return res.status(400).json({ message: "Old password is incorrect" });
+        const user = await User.findById(req.user._id);
+        if (!user) return res.status(404).json({ message: "User not found" });
 
-    user.password = newPassword;
-    await user.save();
+        const isMatch = await bcrypt.compare(oldPassword, user.password);
+        if (!isMatch) return res.status(401).json({ message: "Incorrect current password" });
 
-    res.status(200).json({ message: "Password updated successfully" });
+        user.password = newPassword;
+        await user.save();
+
+        res.set("Cache-Control", "no-store");
+        res.json({ message: "Password updated successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error changing password" });
+    }
 };
 
-export const deleteAccount = async (req, res) => {
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    await user.deleteOne();
-    res.status(200).json({ message: "Account deleted successfully" });
+export const deleteMe = async (req, res) => {
+    try {
+        await User.findByIdAndDelete(req.user._id);
+        res.set("Cache-Control", "no-store");
+        res.json({ message: "Account deleted successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error deleting account" });
+    }
 };
